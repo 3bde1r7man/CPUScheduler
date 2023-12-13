@@ -28,7 +28,9 @@ class CPUScheduler{
         }
         // SJFScheduler sjf = new SJFScheduler(processes,contextSwitching);
         // sjf.schedule();
-        SRTFScheduler srtf = new SRTFScheduler(processes);
-        srtf.schedule();
+        // SRTFScheduler srtf = new SRTFScheduler(processes);
+        // srtf.schedule();
+        PriorityScheduler priority = new PriorityScheduler(processes);
+        priority.schedule();
     }
 }
