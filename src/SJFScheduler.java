@@ -40,13 +40,11 @@ public class SJFScheduler {
             System.out.println("Process "+process.name+" is finished at time: " + time );
             processesv.remove(index);
         }
-        for (Process p : processes) {
-            System.out.println("SJF Process "+ p.name +" waiting time: " + p.waitingTime);
-        }
+        System.out.println(String.format("%-10s%-20s%-20s", "Process", "Turnaround Time", "Waiting Time"));
         int totalTurnaroundTime = 0;
         for (Process p : processes) {
+            System.out.println(String.format("%-10s%-20s%-20s", p.name, p.turnaroundTime, p.waitingTime));
             totalTurnaroundTime += p.turnaroundTime;
-            System.out.println("SJF Process "+ p.name +" turnaround time: " + p.turnaroundTime);
         }
         System.out.println("SJF Average Waiting Time: " + (float)waitingTime/(float)processesSize);
         System.out.println("SJF Average Turnaround Time: " + (float)totalTurnaroundTime/(float)processesSize);

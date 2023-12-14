@@ -13,8 +13,9 @@ public class PriorityScheduler {
         while (completedProcesses < processes.size()) {
             Vector<Process> readyProcesses = getReadyProcesses(time);
             if (!readyProcesses.isEmpty()) {
-                // Sort the ready processes by priority
                 readyProcesses.sort((p1, p2) -> p1.priority - p2.priority);
+                readyProcesses.get(readyProcesses.size()-1).priority--;
+                // Sort the ready processes by priority
                 
                 // Execute the process with the highest priority
                 Process currentProcess = readyProcesses.get(0);
@@ -28,18 +29,17 @@ public class PriorityScheduler {
                 for (Process process : processes) {
                     if (process != currentProcess && process.remainingTime > 0 && process.arrivalTime <= time - 1) {
                         process.waitingTime++;
+
                     }
                 }
             }
         }
-        for (Process process : processes) {
-            System.out.println("Priority Process "+ process.name +" waiting time: " + process.waitingTime);
-            waitingTime += process.waitingTime;
-        }
+        System.out.println(String.format("%-10s%-20s%-20s", "Process", "Turnaround Time", "Waiting Time"));
         int totalTurnaroundTime = 0;
         for (Process process : processes) {
+            System.out.println(String.format("%-10s%-20s%-20s", process.name, process.turnaroundTime, process.waitingTime));
+            waitingTime += process.waitingTime;
             totalTurnaroundTime += process.turnaroundTime;
-            System.out.println("Priority Process "+ process.name +" turnaround time: " + process.turnaroundTime);
         }
         System.out.println("Priority Average Waiting Time: " + (float)waitingTime/(float)processesSize);
         System.out.println("Priority Average Turnaround Time: " + (float)totalTurnaroundTime/(float)processesSize);
