@@ -2,7 +2,7 @@ import java.util.Vector;
 
 public class SJFScheduler {
     int contextSwitching;
-    Vector<Process> processes = new Vector<Process>();
+    Vector<Process> processes;
     public SJFScheduler(Vector<Process> processes, int contextSwitching){
         this.contextSwitching = contextSwitching;
         this.processes = processes;
@@ -16,6 +16,7 @@ public class SJFScheduler {
 
         processesv.sort((p1,p2)->p1.arrivalTime - p2.arrivalTime);
         Process process = processesv.get(0);
+        process.turnaroundTime = process.burstTime;
         processesv.remove(0);
         System.out.println("Process "+process.name+" is running at time: " + time );
         time += process.burstTime;
@@ -35,13 +36,20 @@ public class SJFScheduler {
             waitingTime += process.waitingTime;
             System.out.println("Process "+process.name+" is running at time: " + time );
             time += process.burstTime;
+            process.turnaroundTime = time - process.arrivalTime;
             System.out.println("Process "+process.name+" is finished at time: " + time );
             processesv.remove(index);
         }
         for (Process p : processes) {
             System.out.println("SJF Process "+ p.name +" waiting time: " + p.waitingTime);
         }
+        int totalTurnaroundTime = 0;
+        for (Process p : processes) {
+            totalTurnaroundTime += p.turnaroundTime;
+            System.out.println("SJF Process "+ p.name +" turnaround time: " + p.turnaroundTime);
+        }
         System.out.println("SJF Average Waiting Time: " + (float)waitingTime/(float)processesSize);
+        System.out.println("SJF Average Turnaround Time: " + (float)totalTurnaroundTime/(float)processesSize);
     }
 
 }

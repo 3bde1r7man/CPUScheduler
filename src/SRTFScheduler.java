@@ -2,7 +2,7 @@ import java.util.List;
 import java.util.Vector;
 
 public class SRTFScheduler {
-    Vector<Process> processes = new Vector<Process>();
+    Vector<Process> processes;
     public SRTFScheduler(Vector<Process> processes){
         this.processes = processes;
     }
@@ -22,9 +22,9 @@ public class SRTFScheduler {
                 Process currentProcess = readyProcesses.get(0);
                 executeProcess(currentProcess, time);
                 time++;
-                //waitingTime += time - currentProcess.arrivalTime;
-                // Update completedProcesses count
+                
                 if (currentProcess.remainingTime == 0) {
+                    currentProcess.turnaroundTime = time - currentProcess.arrivalTime;
                     completedProcesses++;
                 }
                 for (Process process : processes) {
@@ -38,7 +38,13 @@ public class SRTFScheduler {
             System.out.println("SRTF Process "+ process.name +" waiting time: " + process.waitingTime);
             waitingTime += process.waitingTime;
         }
+        int totalTurnaroundTime = 0;
+        for (Process process : processes) {
+            totalTurnaroundTime += process.turnaroundTime;
+            System.out.println("SRTF Process "+ process.name +" turnaround time: " + process.turnaroundTime);
+        }
         System.out.println("SRTF Average Waiting Time: " + (float)waitingTime/(float)processesSize);
+        System.out.println("SRTF Average Turnaround Time: " + (float)totalTurnaroundTime/(float)processesSize);
     }
     private void executeProcess(Process process, int currentTime) {
         System.out.println("Time " + currentTime + ": Executing process " + process.name);

@@ -1,7 +1,7 @@
 import java.util.Vector;
 
 public class PriorityScheduler {
-    Vector<Process> processes = new Vector<Process>();
+    Vector<Process> processes;
     public PriorityScheduler(Vector<Process> processes){
         this.processes = processes;
     }
@@ -22,6 +22,7 @@ public class PriorityScheduler {
                 time++;
                 
                 if (currentProcess.remainingTime == 0) {
+                    currentProcess.turnaroundTime = time - currentProcess.arrivalTime;
                     completedProcesses++;
                 }
                 for (Process process : processes) {
@@ -35,7 +36,13 @@ public class PriorityScheduler {
             System.out.println("Priority Process "+ process.name +" waiting time: " + process.waitingTime);
             waitingTime += process.waitingTime;
         }
+        int totalTurnaroundTime = 0;
+        for (Process process : processes) {
+            totalTurnaroundTime += process.turnaroundTime;
+            System.out.println("Priority Process "+ process.name +" turnaround time: " + process.turnaroundTime);
+        }
         System.out.println("Priority Average Waiting Time: " + (float)waitingTime/(float)processesSize);
+        System.out.println("Priority Average Turnaround Time: " + (float)totalTurnaroundTime/(float)processesSize);
     }
     private void executeProcess(Process process, int currentTime) {
         System.out.println("Time " + currentTime + ": Executing process " + process.name);
