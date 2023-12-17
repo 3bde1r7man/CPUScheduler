@@ -13,6 +13,9 @@ public class AGScheduler {
     public AGScheduler(Vector<Process> processes, int timeQuantum){
         this.timeQuantum = timeQuantum;
         this.processes = processes;
+        this.readyQueue = new LinkedList<Process>();
+        dieList = new Vector<Process>();
+
         for(Process process : processes){
             quntaums.put(process.name, new Vector<Integer>());
             quntaums.get(process.name).add(process.timeQuantum);
@@ -186,5 +189,88 @@ public class AGScheduler {
 
     private int RandomNumber(int min, int max){
         return (int) (Math.random() * (max - min + 1) + min);
+    }
+
+    private void IncreaseQuantumTime(Process currProcess, int time) {
+      double sumOfQuantumTime = 0;
+      for(Process process : processes) {
+        if (process.arrivalTime <= time) {
+          sumOfQuantumTime += process.timeQuantum;
+        }
+      }
+      currProcess.timeQuantum += Math.ceil((10/100) * (sumOfQuantumTime / processes.size()));
+    }
+
+    private void excuteNonPreemptive(Process arrivedProcess, int time) {
+      int halfOfQuantumTime = (int) Math.ceil((double) arrivedProcess.timeQuantum / 2);
+
+      // remaining time = 1 ==> quantum time = 2
+      if (arrivedProcess.remainingTime - halfOfQuantumTime <= 0) {
+        // calculate turn around time
+        arrivedProcess.turnaroundTime = (arrivedProcess.remainingTime + time) - arrivedProcess.arrivalTime;
+
+        // calculate waiting time 
+        arrivedProcess.waitingTime = arrivedProcess.turnaroundTime -  arrivedProcess.burstTime;
+        time += arrivedProcess.remainingTime ;
+        return;
+      }
+      
+      arrivedProcess.remainingTime -= halfOfQuantumTime;
+      time += halfOfQuantumTime;
+    }
+
+    private void excutePreemptive(Process arrivedProcess, Process currentExcuted, int time, int count) {
+      // there is new process arrived 
+      if (arrivedProcess != null) {
+        // compare its AG with the current excuted
+        if (arrivedProcess.AGFactor < currentExcuted.AGFactor) {
+          // add the remaining unused quantum time
+          currentExcuted.timeQuantum += currentExcuted.timeQuantum - count;
+          // update the burst time
+          currentExcuted.remainingTime -= count;
+          // add the process to the ready queue
+          readyQueue.add(currentExcuted);
+          // excute the arrived process
+          currentExcuted = arrivedProcess;
+          count = 0;
+        }
+        // put the arrived process in the ready queue
+        else {
+          readyQueue.add(arrivedProcess);
+        }
+      }
+
+      // current process finishes its remaining time
+      else if (currentExcuted.remainingTime - count <= 0) {
+        // calculate the turnaround time for the finished process
+        currentExcuted.turnaroundTime = time - currentExcuted.arrivalTime;
+        // calculate waiting time for the finished proces
+        currentExcuted.waitingTime = currentExcuted.turnaroundTime - currentExcuted.burstTime;
+        // update the time quantum by 0
+        currentExcuted.timeQuantum = 0;
+        // update the remaining time
+        currentExcuted.remainingTime -= count;
+        // add the current excuted process to the die list (list that contains all finished processes)
+        dieList.add(currentExcuted);
+        // get new process from the ready queue
+        currentExcuted = readyQueue.poll();
+        // reset the count
+        count = 0;
+      }
+
+      // if currrent exuted process finishes its quantum time
+      else if (currentExcuted.timeQuantum == count + Math.ceil((double)currentExcuted.timeQuantum / 2 )) {
+        // increase quantum time by 10% of the mean quantum time
+        IncreaseQuantumTime(currentExcuted, time);
+
+        // decrease quantum time
+        currentExcuted.remainingTime -= count;
+
+        // add the excuted process to the read queue
+        readyQueue.add(currentExcuted);
+
+        // update current ecuted process by process from the ready queue
+        currentExcuted = readyQueue.poll();
+      }      
     }
 }
