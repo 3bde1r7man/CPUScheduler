@@ -3,6 +3,7 @@ import java.util.Vector;
 
 public class SRTFScheduler {
     Vector<Process> processes;
+    int maxStarvingTime = 15;
 
     public SRTFScheduler(Vector<Process> processes) {
         this.processes = processes;
@@ -14,11 +15,11 @@ public class SRTFScheduler {
         int waitingTime = 0;
         int processesSize = processes.size();
         int completedProcesses = 0;
-        int starvingTime = 15;
         while (completedProcesses < processes.size()) {
             List<Process> readyProcesses = getReadyProcesses(time);
+            // Check if there is a starving process
             for (Process process : readyProcesses) {
-                if (process.waitingTime >= starvingTime) {
+                if (process.waitingTime >= maxStarvingTime) {
                     time = executeStravingProcess(readyProcesses, process, time);
                     completedProcesses++;
                     process.turnaroundTime = time - process.arrivalTime;
@@ -28,8 +29,6 @@ public class SRTFScheduler {
             if (!readyProcesses.isEmpty()) {
                 // Sort the ready processes by remaining time
                 readyProcesses.sort((p1, p2) -> p1.remainingTime - p2.remainingTime);
-                // Check if there is a starving process
-                
                 // Execute the process with the shortest remaining time
                 Process currentProcess = readyProcesses.get(0);
                 executeProcess(currentProcess, time);
@@ -45,6 +44,8 @@ public class SRTFScheduler {
                         process.waitingTime++;
                     }
                 }
+            }else{
+                time++;
             }
         }
         System.out.println(String.format("%-10s%-20s%-20s", "Process", "Turnaround Time", "Waiting Time"));
@@ -67,23 +68,36 @@ public class SRTFScheduler {
     }
 
     private int executeStravingProcess(List<Process> ready,Process process, int currentTime) {
-        while(process.remainingTime > 0){
-            System.out.println("Time " + currentTime + ": Executing process " + process.name);
-            process.remainingTime--;
-            currentTime++;
+        if(process.remainingTime < maxStarvingTime){
+            while(process.remainingTime > 0){
+                System.out.println("Time " + currentTime + ": Executing process " + process.name);
+                process.remainingTime--;
+                currentTime++;
+                for (Process p : ready) {
+                    if (p != process && p.remainingTime > 0) {
+                        p.waitingTime++;
+                    }
+                }
+            }
             for (Process p : ready) {
-                if (p != process && p.remainingTime > 0) {
-                    p.waitingTime++;
+                if (p == process) {
+                    ready.remove(p);
+                    break;
+                }
+            }
+        }else{
+            for(int i = 0; i < maxStarvingTime; i++){
+                System.out.println("Time " + currentTime + ": Executing process " + process.name);
+                process.remainingTime--;
+                currentTime++;
+                for (Process p : ready) {
+                    if (p != process && p.remainingTime > 0) {
+                        p.waitingTime++;
+                    }
                 }
             }
         }
         
-        for (Process p : ready) {
-            if (p == process) {
-                ready.remove(p);
-                break;
-            }
-        }
         return currentTime;
     }
 

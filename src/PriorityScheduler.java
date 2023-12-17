@@ -13,9 +13,9 @@ public class PriorityScheduler {
         while (completedProcesses < processes.size()) {
             Vector<Process> readyProcesses = getReadyProcesses(time);
             if (!readyProcesses.isEmpty()) {
+                // Sort the ready processes by priority
                 readyProcesses.sort((p1, p2) -> p1.priority - p2.priority);
                 readyProcesses.get(readyProcesses.size()-1).priority--;
-                // Sort the ready processes by priority
                 
                 // Execute the process with the highest priority
                 Process currentProcess = readyProcesses.get(0);
@@ -32,6 +32,8 @@ public class PriorityScheduler {
 
                     }
                 }
+            }else{
+                time++;
             }
         }
         System.out.println(String.format("%-10s%-20s%-20s", "Process", "Turnaround Time", "Waiting Time"));
